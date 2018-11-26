@@ -1,0 +1,44 @@
+---
+title: "Projekt"
+author: "Joanna So³omiewicz"
+date: "15 listopada 2018"
+output: 
+  html_document: 
+    theme: spacelab
+    toc: yes
+    toc_float: yes
+---
+
+#Pobieranie bibliotek
+```{r pobieranie bibliotek, message = FALSE}
+library(dplyr)
+```
+
+#Wczytywanie danych
+```{r wczytywanie danych, cache = TRUE}
+data <- read.csv2('../Downloads/all_summary/all_summary.csv', nrows = 10000)
+dim(data)
+```
+
+#Usuniêcie wybranych wierszy
+```{r usuniêcie wybranych wierszy}
+data <- data[!data$res_name %in% c("UNK", "UNX", "UNL", "DUM", "N", "BLOB", "ALA", "ARG", "ASN", "ASP", "CYS", "GLN", "GLU", "GLY", "HIS", "ILE", "LEU", "LYS", "MET", "MSE", "PHE", "PRO", "SEC", "SER", "THR", "TRP", "TYR", "VAL", "DA", "DG", "DT", "DC", "DU", "A", "G", "T", "C", "U", "HOH", "H20", "WAT"),]
+dim(data)
+```
+
+#Wyczyszczenie danych z instancji pustych
+```{r wyczyszczenie pustych danych, cache = TRUE}
+#data <- data[complete.cases(data), ]
+#dim(data)
+```
+
+#Podsumowanie danych
+```{r podsumowanie danych}
+knitr::kable(summary(data))
+```
+
+#Najpopularniejsze
+```{r najpopularniejsze}
+data <- data %>% group_by(res_name) %>% summarise(n = n()) %>% ungroup() %>% arrange(-n)
+data
+```
