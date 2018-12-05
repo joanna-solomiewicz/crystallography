@@ -16,13 +16,14 @@ library(dplyr)
 
 #Wczytywanie danych
 ```{r wczytywanie danych, cache = TRUE}
-data <- read.csv2('../Downloads/all_summary/all_summary.csv', nrows = 10000)
+data <- read.csv2('./all_summary.csv', nrows = 10000)
 dim(data)
 ```
 
 #Usuniêcie wybranych wierszy
 ```{r usuniêcie wybranych wierszy}
-data <- data[!data$res_name %in% c("UNK", "UNX", "UNL", "DUM", "N", "BLOB", "ALA", "ARG", "ASN", "ASP", "CYS", "GLN", "GLU", "GLY", "HIS", "ILE", "LEU", "LYS", "MET", "MSE", "PHE", "PRO", "SEC", "SER", "THR", "TRP", "TYR", "VAL", "DA", "DG", "DT", "DC", "DU", "A", "G", "T", "C", "U", "HOH", "H20", "WAT"),]
+deletable_res_name <- c("UNK", "UNX", "UNL", "DUM", "N", "BLOB", "ALA", "ARG", "ASN", "ASP", "CYS", "GLN", "GLU", "GLY", "HIS", "ILE", "LEU", "LYS", "MET", "MSE", "PHE", "PRO", "SEC", "SER", "THR", "TRP", "TYR", "VAL", "DA", "DG", "DT", "DC", "DU", "A", "G", "T", "C", "U", "HOH", "H20", "WAT")
+data <- data[!data$res_name %in% deletable_res_name,]
 dim(data)
 ```
 
@@ -34,11 +35,16 @@ dim(data)
 
 #Podsumowanie danych
 ```{r podsumowanie danych}
-knitr::kable(summary(data))
+#knitr::kable(summary(data))
+dim(data)
 ```
 
 #Najpopularniejsze
 ```{r najpopularniejsze}
-data <- data %>% group_by(res_name) %>% summarise(n = n()) %>% ungroup() %>% arrange(-n)
-data
+# finding 50 most popular res_names
+popular_res_names <- data %>% group_by(res_name) %>% summarise(n = n()) %>% ungroup() %>% arrange(-n) %>% slice(1:50)
+# converting data frame format
+popular_res_names <- as.list(popular_res_names[,1])$res_name
+data <- data[data$res_name %in% popular_res_names,]
+dim(data)
 ```
