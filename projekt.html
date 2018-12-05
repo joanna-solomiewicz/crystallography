@@ -257,12 +257,31 @@ dim(data)</code></pre>
 <div id="najpopularniejsze" class="section level1">
 <h1>Najpopularniejsze</h1>
 <pre class="r"><code># finding 50 most popular res_names
-popular_res_names &lt;- data %&gt;% group_by(res_name) %&gt;% summarise(n = n()) %&gt;% ungroup() %&gt;% arrange(-n) %&gt;% slice(1:50)
+popular_res_names &lt;- data %&gt;% group_by(res_name) %&gt;% summarise(n = n()) %&gt;% arrange(-n) %&gt;% slice(1:50)
 # converting data frame format
 popular_res_names &lt;- as.list(popular_res_names[,1])$res_name
 data &lt;- data[data$res_name %in% popular_res_names,]
 dim(data)</code></pre>
 <pre><code>## [1] 6789  412</code></pre>
+</div>
+<div id="licznosc-ligandow-wedug-nazwy" class="section level1">
+<h1>Liczność ligandów według nazwy</h1>
+<pre class="r"><code>count_by_name &lt;- data %&gt;% group_by(res_name) %&gt;% summarise(cardinality = n()) %&gt;% arrange(-cardinality)
+count_by_name</code></pre>
+<pre><code>## # A tibble: 50 x 2
+##    res_name cardinality
+##    &lt;fct&gt;          &lt;int&gt;
+##  1 SO4             1007
+##  2 GOL              632
+##  3 EDO              516
+##  4 NAG              464
+##  5 CL               387
+##  6 DMS              340
+##  7 ZN               323
+##  8 CA               284
+##  9 HEM              260
+## 10 MG               206
+## # ... with 40 more rows</code></pre>
 </div>
 
 

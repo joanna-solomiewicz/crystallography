@@ -42,9 +42,16 @@ dim(data)
 #Najpopularniejsze
 ```{r najpopularniejsze}
 # finding 50 most popular res_names
-popular_res_names <- data %>% group_by(res_name) %>% summarise(n = n()) %>% ungroup() %>% arrange(-n) %>% slice(1:50)
+popular_res_names <- data %>% group_by(res_name) %>% summarise(n = n()) %>% arrange(-n) %>% slice(1:50)
 # converting data frame format
 popular_res_names <- as.list(popular_res_names[,1])$res_name
 data <- data[data$res_name %in% popular_res_names,]
 dim(data)
 ```
+
+#Licznoœæ ligandów wed³ug nazwy
+```{r licznoœæ ligandów}
+count_by_name <- data %>% group_by(res_name) %>% summarise(cardinality = n()) %>% arrange(-cardinality)
+count_by_name
+```
+
