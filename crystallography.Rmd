@@ -23,17 +23,19 @@ data <- read.csv2('./all_summary.csv', nrows = 10000)
 dim(data)
 ```
 
+#Processing missing data
+```{r processing missing data, cache = TRUE}
+dim(data)
+data <- data %>% select(one_of("res_name", "blob_volume_coverage", "blob_volume_coverage_second", "skeleton_density", "local_res_atom_non_h_count", "local_res_atom_non_h_electron_sum"))
+data <- data[complete.cases(data), ]
+dim(data)
+```
+
 #Deleting chosen ligands
 ```{r deleting chosen ligands}
 deletable_res_name <- c("UNK", "UNX", "UNL", "DUM", "N", "BLOB", "ALA", "ARG", "ASN", "ASP", "CYS", "GLN", "GLU", "GLY", "HIS", "ILE", "LEU", "LYS", "MET", "MSE", "PHE", "PRO", "SEC", "SER", "THR", "TRP", "TYR", "VAL", "DA", "DG", "DT", "DC", "DU", "A", "G", "T", "C", "U", "HOH", "H20", "WAT")
 data <- data[!data$res_name %in% deletable_res_name,]
 dim(data)
-```
-
-#Processing missing data
-```{r processing missing data, cache = TRUE}
-#data <- data[complete.cases(data), ]
-#dim(data)
 ```
 
 #Data summary
