@@ -1,5 +1,5 @@
 ---
-title: "Projekt"
+title: "Crystallography"
 author: "Joanna So³omiewicz"
 date: "15 listopada 2018"
 output: 
@@ -9,40 +9,40 @@ output:
     toc_float: yes
 ---
 
-#Pobieranie bibliotek
-```{r pobieranie bibliotek, message = FALSE}
+#Loading libraries
+```{r loading libraries, message = FALSE}
 library(dplyr)
 library(ggplot2)
 library(plotly)
 ```
 
-#Wczytywanie danych
-```{r wczytywanie danych, cache = TRUE}
+#Reading data
+```{r reading data, cache = TRUE}
 data <- read.csv2('./all_summary.csv', nrows = 10000)
 dim(data)
 ```
 
-#Usuniêcie wybranych wierszy
-```{r usuniêcie wybranych wierszy}
+#Deleting chosen ligands
+```{r deleting chosen ligands}
 deletable_res_name <- c("UNK", "UNX", "UNL", "DUM", "N", "BLOB", "ALA", "ARG", "ASN", "ASP", "CYS", "GLN", "GLU", "GLY", "HIS", "ILE", "LEU", "LYS", "MET", "MSE", "PHE", "PRO", "SEC", "SER", "THR", "TRP", "TYR", "VAL", "DA", "DG", "DT", "DC", "DU", "A", "G", "T", "C", "U", "HOH", "H20", "WAT")
 data <- data[!data$res_name %in% deletable_res_name,]
 dim(data)
 ```
 
-#Wyczyszczenie danych z instancji pustych
-```{r wyczyszczenie pustych danych, cache = TRUE}
+#Processing missing data
+```{r processing missing data, cache = TRUE}
 #data <- data[complete.cases(data), ]
 #dim(data)
 ```
 
-#Podsumowanie danych
-```{r podsumowanie danych}
+#Data summary
+```{r data summary}
 #knitr::kable(summary(data))
 dim(data)
 ```
 
-#Najpopularniejsze
-```{r najpopularniejsze}
+#50 most popular ligands
+```{r 50 most popular ligands}
 # finding 50 most popular res_names
 popular_res_names <- data %>% group_by(res_name) %>% summarise(n = n()) %>% arrange(-n) %>% slice(1:50)
 # converting data frame format
@@ -51,8 +51,8 @@ data <- data[data$res_name %in% popular_res_names,]
 dim(data)
 ```
 
-#Licznoœæ ligandów wed³ug nazwy
-```{r licznoœæ ligandów}
+#Cardinality of ligands
+```{r cardinality of ligands}
 count_by_name <- data %>% group_by(res_name) %>% summarise(cardinality = n()) %>% arrange(-cardinality)
 count_by_name
 
@@ -60,8 +60,7 @@ plot <- ggplot(count_by_name, aes(x = reorder(res_name, -cardinality), y = cardi
   geom_bar(stat = "identity") +
   theme(axis.text.x = element_text(angle = 90)) +
   xlab("ligand")+
-  labs(title = "Licznoœæ 50 najpopularniejszych ligandów wed³ug nazwy")
+  labs(title = "Cardinality of ligands by name")
 
 ggplotly(plot)
 ```
-
