@@ -12,6 +12,8 @@ output:
 #Pobieranie bibliotek
 ```{r pobieranie bibliotek, message = FALSE}
 library(dplyr)
+library(ggplot2)
+library(plotly)
 ```
 
 #Wczytywanie danych
@@ -53,5 +55,13 @@ dim(data)
 ```{r licznoœæ ligandów}
 count_by_name <- data %>% group_by(res_name) %>% summarise(cardinality = n()) %>% arrange(-cardinality)
 count_by_name
+
+plot <- ggplot(count_by_name, aes(x = reorder(res_name, -cardinality), y = cardinality, fill = cardinality)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  xlab("ligand")+
+  labs(title = "Licznoœæ 50 najpopularniejszych ligandów wed³ug nazwy")
+
+ggplotly(plot)
 ```
 
