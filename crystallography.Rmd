@@ -14,6 +14,7 @@ output:
 library(dplyr)
 library(ggplot2)
 library(plotly)
+library(tidyr)
 ```
 
 #Reading data
@@ -68,4 +69,21 @@ plot <- ggplot(popular_names, aes(x = reorder(res_name, -cardinality), y = cardi
   labs(title = "Cardinality of ligands by name")
 
 ggplotly(plot)
+```
+
+#Distribution of atom and electron count
+```{r distribution of atom and electron count}
+plot_atom <- ggplot(data, aes(x = local_res_atom_non_h_count)) + 
+  geom_density(alpha = .3, fill = "#00CECB", color = NA) +
+  xlab("atom count") +
+  labs(title = "Atom count distribution")
+
+ggplotly(plot_atom)
+
+plot_electron <- ggplot(data, aes(x = local_res_atom_non_h_electron_sum)) + 
+  geom_density(alpha = .3, fill = "#FF5E5B", color = NA) +
+  xlab("electron count") +
+  labs(title = "Electron count distribution")
+
+ggplotly(plot_electron)
 ```
