@@ -38,7 +38,9 @@ dim(data)
 
 #Data summary
 ```{r data summary}
-#knitr::kable(summary(data))
+statistics <- data %>%
+  select(res_name, blob_volume_coverage, blob_volume_coverage_second, skeleton_density)
+knitr::kable(summary(statistics))
 dim(data)
 ```
 
