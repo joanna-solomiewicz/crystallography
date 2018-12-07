@@ -25,16 +25,18 @@ dim(data)
 
 #Processing missing data
 ```{r processing missing data, cache = TRUE}
+required_columns <- c("res_name", "blob_volume_coverage", "blob_volume_coverage_second", "skeleton_density", "local_res_atom_non_h_count", "local_res_atom_non_h_electron_sum")
 dim(data)
-data <- data %>% select(one_of("res_name", "blob_volume_coverage", "blob_volume_coverage_second", "skeleton_density", "local_res_atom_non_h_count", "local_res_atom_non_h_electron_sum"))
-data <- data[complete.cases(data), ]
+data <- data %>% 
+  select(one_of(required_columns)) %>%
+  drop_na()
 dim(data)
 ```
 
 #Deleting chosen ligands
 ```{r deleting chosen ligands}
 deletable_res_name <- c("UNK", "UNX", "UNL", "DUM", "N", "BLOB", "ALA", "ARG", "ASN", "ASP", "CYS", "GLN", "GLU", "GLY", "HIS", "ILE", "LEU", "LYS", "MET", "MSE", "PHE", "PRO", "SEC", "SER", "THR", "TRP", "TYR", "VAL", "DA", "DG", "DT", "DC", "DU", "A", "G", "T", "C", "U", "HOH", "H20", "WAT")
-data <- data[!data$res_name %in% deletable_res_name,]
+data <- data %>% filter(!res_name %in% deletable_res_name)
 dim(data)
 ```
 
@@ -48,31 +50,27 @@ dim(data)
 
 #50 most popular ligands
 ```{r 50 most popular ligands}
-# finding 50 most popular res_names
-popular_names <- data %>% 
-  select(res_name) %>% 
-  group_by(res_name) %>% 
-  summarise(cardinality = n()) %>% 
-  arrange(-cardinality) %>% 
+popular_ligands <- data %>% 
+  select(res_name) %>%
+  count(res_name, sort = TRUE) %>%
   slice(1:50)
 
-# converting data frame format
-popular_names_list <- as.list(popular_names[,"res_name"])$res_name
+popular_names_vector <- popular_ligands %>%
+  pull(res_name)
 
-#limitation to popular ligands
-data <- data[data$res_name %in% popular_names_list, ]
+data <- data %>% filter(res_name %in% popular_names_vector)
 dim(data)
 ```
 
 #Cardinality of ligands by name
 ```{r cardinality of ligands}
-plot <- ggplot(popular_names, aes(x = reorder(res_name, -cardinality), y = cardinality, fill = cardinality)) +
+plot_ligands <- ggplot(popular_ligands, aes(x = reorder(res_name, -n), y = n, fill = n)) +
   geom_bar(stat = "identity") +
   theme(axis.text.x = element_text(angle = 90)) +
   xlab("ligand")+
   labs(title = "Cardinality of ligands by name")
 
-ggplotly(plot)
+ggplotly(plot_ligands)
 ```
 
 #Distribution of atom and electron count
