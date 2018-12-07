@@ -28,7 +28,7 @@ dim(data)
 required_columns <- c("res_name", "blob_volume_coverage", "blob_volume_coverage_second", "skeleton_density", "local_res_atom_non_h_count", "local_res_atom_non_h_electron_sum")
 dim(data)
 data <- data %>% 
-  select(one_of(required_columns)) %>%
+  select(one_of(required_columns), contains("part_01")) %>%
   drop_na()
 dim(data)
 ```
@@ -88,4 +88,17 @@ plot_electron <- ggplot(data, aes(x = local_res_atom_non_h_electron_sum)) +
   labs(title = "Electron count distribution")
 
 ggplotly(plot_electron)
+```
+
+#Distribution of part_01 columns
+```{r distribution of part_01 columns}
+plot_part_data <- data %>%
+  select(contains("part_01")) %>%
+  gather(part, value, 1:106)
+dim(plot_part_data)
+
+# plot_part <- ggplot(plot_part_data, aes(x = part, y = value)) +
+#   geom_boxplot() +
+#   facet_wrap(~part)
+# ggplotly(plot_part)
 ```
