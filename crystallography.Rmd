@@ -95,10 +95,20 @@ ggplotly(plot_electron)
 plot_part_data <- data %>%
   select(contains("part_01")) %>%
   gather(part, value, 1:106)
+
 dim(plot_part_data)
 
-# plot_part <- ggplot(plot_part_data, aes(x = part, y = value)) +
-#   geom_boxplot() +
-#   facet_wrap(~part)
-# ggplotly(plot_part)
+plot_part_data_1 <- plot_part_data[1:118926,]
+plot_part_data_2 <- plot_part_data[118927:237852,]
+plot_part_data_3 <- plot_part_data[237853:356778,]
+plot_part_data_4 <- plot_part_data[356779:475704,]
+plot_part_data_5 <- plot_part_data[475705:594630,]
+plot_part_data_6 <- plot_part_data[594631:700342,]
+
+plot_ly(plot_part_data_1, x = plot_part_data_1$part, y = plot_part_data_1$value, type = 'box')
+plot_ly(plot_part_data_2, x = plot_part_data_2$part, y = plot_part_data_2$value, type = 'box')
+plot_ly(plot_part_data_3, x = plot_part_data_3$part, y = plot_part_data_3$value, type = 'box')
+plot_ly(plot_part_data_4, x = plot_part_data_4$part, y = plot_part_data_4$value, type = 'box')
+plot_ly(plot_part_data_5, x = plot_part_data_5$part, y = plot_part_data_5$value, type = 'box')
+plot_ly(plot_part_data_6, x = plot_part_data_6$part, y = plot_part_data_6$value, type = 'box')
 ```
