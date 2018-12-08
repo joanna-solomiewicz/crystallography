@@ -1,5 +1,5 @@
 ---
-title: "Crystallography"
+title: "Krystalografia"
 author: "Joanna So³omiewicz"
 date: "15 listopada 2018"
 output: 
@@ -9,7 +9,7 @@ output:
     toc_float: yes
 ---
 
-#Loading libraries
+#Wykorzystane biblioteki
 ```{r loading libraries, message = FALSE}
 library(dplyr)
 library(ggplot2)
@@ -21,7 +21,7 @@ library(caret)
 library(data.table)
 ```
 
-#Reading data
+#Wczytywanie danych
 ```{r reading data, cache = TRUE}
 removable_columns <- c("title", "pdb_code", "res_id", "chain_id", "local_res_atom_count", "local_res_atom_non_h_occupancy_sum", "local_res_atom_non_h_electron_occupancy_sum", "local_res_atom_C_count", "local_res_atom_N_count", "local_res_atom_O_count", "local_res_atom_S_count", "dict_atom_C_count", "dict_atom_N_count", "dict_atom_O_count", "dict_atom_S_count", "skeleton_data", "skeleton_cycle_4", "skeleton_diameter", "skeleton_cycle_6", "skeleton_cycle_7", "skeleton_closeness_006_008", "skeleton_closeness_002_004", "skeleton_cycle_3", "skeleton_avg_degree", "skeleton_closeness_004_006", "skeleton_closeness_010_012", "skeleton_closeness_012_014", "skeleton_edges", "skeleton_radius", "skeleton_cycle_8_plus", "skeleton_closeness_020_030", "skeleton_deg_5_plus", "skeleton_closeness_016_018", "skeleton_closeness_008_010", "skeleton_closeness_018_020", "skeleton_average_clustering", "skeleton_closeness_040_050", "skeleton_closeness_014_016", "skeleton_center", "skeleton_closeness_000_002", "skeleton_density", "skeleton_closeness_030_040", "skeleton_deg_4", "skeleton_deg_0", "skeleton_deg_1", "skeleton_deg_2", "skeleton_deg_3", "skeleton_graph_clique_number", "skeleton_nodes", "skeleton_cycles", "skeleton_cycle_5", "skeleton_closeness_050_plus", "skeleton_periphery", "fo_col", "fc_col", "weight_col", "grid_space", "solvent_radius", "solvent_opening_radius", "part_step_FoFc_std_min", "part_step_FoFc_std_max", "part_step_FoFc_std_step")
 
@@ -29,7 +29,7 @@ data <- fread("./all_summary.csv", nrows = 10000, header = TRUE, drop = removabl
 dim(data)
 ```
 
-#Processing missing data
+#Przetwarzanie brakuj¹cych danych
 ```{r processing missing data, cache = TRUE}
 dim(data)
 data <- data %>% 
@@ -37,14 +37,14 @@ data <- data %>%
 dim(data)
 ```
 
-#Deleting chosen ligands
+#Usuwanie niepotrzebnych ligandów
 ```{r deleting chosen ligands}
 deletable_res_name <- c("UNK", "UNX", "UNL", "DUM", "N", "BLOB", "ALA", "ARG", "ASN", "ASP", "CYS", "GLN", "GLU", "GLY", "HIS", "ILE", "LEU", "LYS", "MET", "MSE", "PHE", "PRO", "SEC", "SER", "THR", "TRP", "TYR", "VAL", "DA", "DG", "DT", "DC", "DU", "A", "G", "T", "C", "U", "HOH", "H20", "WAT")
 data <- data %>% filter(!res_name %in% deletable_res_name)
 dim(data)
 ```
 
-#Data summary
+#Podsumowanie danych
 ```{r data summary}
 statistics <- data %>%
   select(res_name, blob_volume_coverage, blob_volume_coverage_second)
@@ -52,7 +52,7 @@ kable(summary(statistics))
 dim(data)
 ```
 
-#50 most popular ligands
+#50 najpopularniejszych ligandów
 ```{r 50 most popular ligands}
 popular_ligands <- data %>% 
   select(res_name) %>%
@@ -66,18 +66,19 @@ data <- data %>% filter(res_name %in% popular_names_vector)
 dim(data)
 ```
 
-#Cardinality of ligands by name
+#Licznoœæ najpopularniejszych ligandów wed³ug nazwy
 ```{r cardinality of ligands}
 plot_ligands <- ggplot(popular_ligands, aes(x = reorder(res_name, -n), y = n, fill = n)) +
   geom_bar(stat = "identity") +
   theme(axis.text.x = element_text(angle = 90)) +
   xlab("ligand")+
-  labs(title = "Cardinality of ligands by name")
+  ylab("licznoœæ") +
+  labs(title = "Licznoœæ ligandów wed³ug nazwy")
 
 ggplotly(plot_ligands)
 ```
 
-#Correlation between variables
+#Korelacja miêdzy zmiennymi
 ```{r correlation between variables}
 data %>%
   select_if(is.numeric) %>%
@@ -85,24 +86,30 @@ data %>%
   corrplot(method = "circle", tl.col = "black", tl.srt = 45)
 ```
 
-#Distribution of atom and electron count
-```{r distribution of atom and electron count}
+#Rozk³ady gêstoœciowe liczb
+##Atomów
+```{r distribution of atom count}
 plot_atom <- ggplot(data, aes(x = local_res_atom_non_h_count)) + 
   geom_density(alpha = .3, fill = "#00CECB", color = NA) +
-  xlab("atom count") +
-  labs(title = "Atom count distribution")
+  xlab("licznoœæ atomów") +
+  ylab("gêstoœæ") +
+  labs(title = "Rozk³ad gêstoœciowy atomów")
 
 ggplotly(plot_atom)
+```
 
+##Elektronów
+```{r distribution of electron count}
 plot_electron <- ggplot(data, aes(x = local_res_atom_non_h_electron_sum)) + 
   geom_density(alpha = .3, fill = "#FF5E5B", color = NA) +
-  xlab("electron count") +
-  labs(title = "Electron count distribution")
+  xlab("licznoœæ elektronów") +
+  ylab("gêstoœæ") +
+  labs(title = "Rozk³ad gêstoœciowy elektronów")
 
 ggplotly(plot_electron)
 ```
 
-#Distribution of part_01 columns
+#Rozk³ad wartoœci kolumn part_01
 ```{r distribution of part_01 columns}
 plot_part_data <- data %>%
   select(contains("part_01")) %>%
@@ -125,8 +132,8 @@ plot_ly(plot_part_data_5, x = plot_part_data_5$part, y = plot_part_data_5$value,
 plot_ly(plot_part_data_6, x = plot_part_data_6$part, y = plot_part_data_6$value, type = 'box')
 ```
 
-#Greatest inconsistency in classes
-##Atom
+#Najwiêksze niezgodnoœci liczby
+##Atomów
 ```{r greatest inconsistency in atom}
 data %>%
   select(res_name, local_res_atom_non_h_count, dict_atom_non_h_count) %>%
@@ -137,7 +144,7 @@ data %>%
   kable()
 ```
 
-##Electron
+##Elektronów
 ```{r greatest inconsistency in electron}
 data %>%
   select(res_name, local_res_atom_non_h_electron_sum, dict_atom_non_h_electron_sum) %>%
@@ -148,8 +155,8 @@ data %>%
   kable()
 ```
 
-#Linear regression
-##Atom count
+#Regresja liniowa
+##Liczba atomów
 ```{r linear regression atom}
 data_partition <- data %>%
   select_if(is.numeric)
@@ -171,7 +178,7 @@ fit
 postResample(pred = prediction, obs = data_test$local_res_atom_non_h_count)
 ```
 
-##Electron count
+##Liczba elektronów
 ```{r linear regression electron}
 data_partition <- data %>%
   select_if(is.numeric)
