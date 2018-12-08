@@ -16,6 +16,7 @@ library(ggplot2)
 library(plotly)
 library(tidyr)
 library(knitr)
+library(corrplot)
 ```
 
 #Reading data
@@ -72,6 +73,14 @@ plot_ligands <- ggplot(popular_ligands, aes(x = reorder(res_name, -n), y = n, fi
   labs(title = "Cardinality of ligands by name")
 
 ggplotly(plot_ligands)
+```
+
+#Correlation between variables
+```{r correlation between variables}
+data %>%
+  select_if(is.numeric) %>%
+  cor %>%
+  corrplot(type = "lower", tl.col = "black", tl.srt = 45)
 ```
 
 #Distribution of atom and electron count
