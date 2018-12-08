@@ -17,20 +17,22 @@ library(plotly)
 library(tidyr)
 library(knitr)
 library(corrplot)
+library(caret)
+library(data.table)
 ```
 
 #Reading data
 ```{r reading data, cache = TRUE}
-data <- read.csv2('./all_summary.csv', nrows = 10000)
+removable_columns <- c("title", "pdb_code", "res_id", "chain_id", "local_res_atom_count", "local_res_atom_non_h_occupancy_sum", "local_res_atom_non_h_electron_occupancy_sum", "local_res_atom_C_count", "local_res_atom_N_count", "local_res_atom_O_count", "local_res_atom_S_count", "dict_atom_C_count", "dict_atom_N_count", "dict_atom_O_count", "dict_atom_S_count", "skeleton_data", "skeleton_cycle_4", "skeleton_diameter", "skeleton_cycle_6", "skeleton_cycle_7", "skeleton_closeness_006_008", "skeleton_closeness_002_004", "skeleton_cycle_3", "skeleton_avg_degree", "skeleton_closeness_004_006", "skeleton_closeness_010_012", "skeleton_closeness_012_014", "skeleton_edges", "skeleton_radius", "skeleton_cycle_8_plus", "skeleton_closeness_020_030", "skeleton_deg_5_plus", "skeleton_closeness_016_018", "skeleton_closeness_008_010", "skeleton_closeness_018_020", "skeleton_average_clustering", "skeleton_closeness_040_050", "skeleton_closeness_014_016", "skeleton_center", "skeleton_closeness_000_002", "skeleton_density", "skeleton_closeness_030_040", "skeleton_deg_4", "skeleton_deg_0", "skeleton_deg_1", "skeleton_deg_2", "skeleton_deg_3", "skeleton_graph_clique_number", "skeleton_nodes", "skeleton_cycles", "skeleton_cycle_5", "skeleton_closeness_050_plus", "skeleton_periphery", "fo_col", "fc_col", "weight_col", "grid_space", "solvent_radius", "solvent_opening_radius", "part_step_FoFc_std_min", "part_step_FoFc_std_max", "part_step_FoFc_std_step")
+
+data <- fread("./all_summary.csv", nrows = 10000, header = TRUE, drop = removable_columns)
 dim(data)
 ```
 
 #Processing missing data
 ```{r processing missing data, cache = TRUE}
-required_columns <- c("res_name", "blob_volume_coverage", "blob_volume_coverage_second", "skeleton_density", "local_res_atom_non_h_count", "local_res_atom_non_h_electron_sum", "dict_atom_non_h_count", "dict_atom_non_h_electron_sum")
 dim(data)
 data <- data %>% 
-  select(one_of(required_columns), contains("part_01")) %>%
   drop_na()
 dim(data)
 ```
@@ -45,7 +47,7 @@ dim(data)
 #Data summary
 ```{r data summary}
 statistics <- data %>%
-  select(res_name, blob_volume_coverage, blob_volume_coverage_second, skeleton_density)
+  select(res_name, blob_volume_coverage, blob_volume_coverage_second)
 kable(summary(statistics))
 dim(data)
 ```
@@ -80,7 +82,7 @@ ggplotly(plot_ligands)
 data %>%
   select_if(is.numeric) %>%
   cor %>%
-  corrplot(type = "lower", tl.col = "black", tl.srt = 45)
+  corrplot(method = "circle", tl.col = "black", tl.srt = 45)
 ```
 
 #Distribution of atom and electron count
@@ -144,5 +146,50 @@ data %>%
   arrange(-electron_inconsistency) %>%
   slice(1:10) %>%
   kable()
+```
+
+#Linear regression
+##Atom count
+```{r linear regression atom}
+data_partition <- data %>%
+  select_if(is.numeric)
+
+set.seed(111)
+partition <- createDataPartition(y = data_partition$local_res_atom_non_h_count, p = 0.7, list = FALSE)
+data_train <- data %>%
+  slice(partition)
+data_test <- data %>%
+  slice(-partition)
+dim(data_train)
+dim(data_test)
+
+set.seed(111)
+fit <- train(local_res_atom_non_h_count ~ ., data = data_train, method = "lm")
+set.seed(111)
+prediction <- predict(fit, newdata = data_test)
+fit
+postResample(pred = prediction, obs = data_test$local_res_atom_non_h_count)
+```
+
+##Electron count
+```{r linear regression electron}
+data_partition <- data %>%
+  select_if(is.numeric)
+
+set.seed(111)
+partition <- createDataPartition(y = data_partition$local_res_atom_non_h_electron_sum, p = 0.7, list = FALSE)
+data_train <- data %>%
+  slice(partition)
+data_test <- data %>%
+  slice(-partition)
+dim(data_train)
+dim(data_test)
+
+set.seed(111)
+fit <- train(local_res_atom_non_h_electron_sum ~ ., data = data_train, method = "lm")
+set.seed(111)
+prediction <- predict(fit, newdata = data_test)
+fit
+postResample(pred = prediction, obs = data_test$local_res_atom_non_h_electron_sum)
 ```
 
