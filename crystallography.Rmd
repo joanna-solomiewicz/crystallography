@@ -111,13 +111,43 @@ ggplotly(plot_electron)
 
 #Rozk³ad wartoœci kolumn part_01
 ```{r distribution of part_01 columns}
+remove_outliers <- function(data, na.rm = TRUE, ...) {
+  qnt <- quantile(data, probs=c(.25, .75), na.rm = na.rm, ...)
+  iqr <- 1.5 * IQR(data, na.rm = na.rm)
+  data_no_outliers <- data
+  data_no_outliers[data < (qnt[1] - iqr)] <- NA
+  data_no_outliers[data > (qnt[2] + iqr)] <- NA
+  data_no_outliers[!is.na(data_no_outliers)]
+  data_no_outliers
+}
+
+#not removing outliers version
 plot_part_data <- data %>%
   select(contains("part_01")) %>%
   gather(part, value, 1:106)
 
+plot_ly(plot_part_data, x = plot_part_data$value, y = plot_part_data$part, type = 'box', height = 2000)
+###
+
+#after removing outliers
+plot_part_data <- data %>%
+  select(contains("part_01"))
 dim(plot_part_data)
 
+plot_part_data <- plot_part_data %>%
+  sapply(remove_outliers) %>%
+  as.data.frame()
+dim(plot_part_data)
+
+plot_part_data <- plot_part_data %>%
+  drop_na()
+dim(plot_part_data)
+
+plot_part_data <- plot_part_data %>%
+  gather(part, value, 1:106)
+
 plot_ly(plot_part_data, x = plot_part_data$value, y = plot_part_data$part, type = 'box', height = 2000)
+###
 ```
 
 #Najwiêksze niezgodnoœci liczby
@@ -146,95 +176,95 @@ data %>%
 #Regresja liniowa
 ##Liczba atomów
 ```{r linear regression atom, error=FALSE, warning=FALSE, message=FALSE}
-data_partition <- data %>%
-  select_if(is.numeric)
-
-set.seed(111)
-partition <- createDataPartition(
-  y = data_partition$local_res_atom_non_h_count,
-  p = .7,
-  list = FALSE)
-
-data_train <- data_partition %>%
-  slice(partition)
-data_test <- data_partition %>%
-  slice(-partition)
-dim(data_train)
-dim(data_test)
-
-set.seed(111)
-fit <- train(local_res_atom_non_h_count ~ ., data = data_train, method = "lm")
-fit
-
-set.seed(111)
-prediction <- predict(fit, newdata = data_test)
-postResample(pred = prediction, obs = data_test$local_res_atom_non_h_count)
+# data_partition <- data %>%
+#   select_if(is.numeric)
+# 
+# set.seed(111)
+# partition <- createDataPartition(
+#   y = data_partition$local_res_atom_non_h_count,
+#   p = .7,
+#   list = FALSE)
+# 
+# data_train <- data_partition %>%
+#   slice(partition)
+# data_test <- data_partition %>%
+#   slice(-partition)
+# dim(data_train)
+# dim(data_test)
+# 
+# set.seed(111)
+# fit <- train(local_res_atom_non_h_count ~ ., data = data_train, method = "lm")
+# fit
+# 
+# set.seed(111)
+# prediction <- predict(fit, newdata = data_test)
+# postResample(pred = prediction, obs = data_test$local_res_atom_non_h_count)
 ```
 
 ##Liczba elektronów
 ```{r linear regression electron, error=FALSE, warning=FALSE, message=FALSE}
-data_partition <- data %>%
-  select_if(is.numeric)
-
-set.seed(111)
-partition <- createDataPartition(
-  y = data_partition$local_res_atom_non_h_electron_sum,
-  p = .7,
-  list = FALSE)
-
-data_train <- data_partition %>%
-  slice(partition)
-data_test <- data_partition %>%
-  slice(-partition)
-dim(data_train)
-dim(data_test)
-
-set.seed(111)
-fit <- train(local_res_atom_non_h_electron_sum ~ ., data = data_train, method = "lm")
-fit
-
-set.seed(111)
-prediction <- predict(fit, newdata = data_test)
-postResample(pred = prediction, obs = data_test$local_res_atom_non_h_electron_sum)
+# data_partition <- data %>%
+#   select_if(is.numeric)
+# 
+# set.seed(111)
+# partition <- createDataPartition(
+#   y = data_partition$local_res_atom_non_h_electron_sum,
+#   p = .7,
+#   list = FALSE)
+# 
+# data_train <- data_partition %>%
+#   slice(partition)
+# data_test <- data_partition %>%
+#   slice(-partition)
+# dim(data_train)
+# dim(data_test)
+# 
+# set.seed(111)
+# fit <- train(local_res_atom_non_h_electron_sum ~ ., data = data_train, method = "lm")
+# fit
+# 
+# set.seed(111)
+# prediction <- predict(fit, newdata = data_test)
+# postResample(pred = prediction, obs = data_test$local_res_atom_non_h_electron_sum)
 ```
 
 #Klasyfikator
 ####Przewidywanie wartoœci res_name
 ```{r classification}
-dim(data)
-
-removable_columns <- c("blob_coverage", "res_coverage", "local_res_atom_non_h_count", "local_res_atom_non_h_electron_sum", "dict_atom_non_h_count", "dict_atom_non_h_electron_sum")
-data_partition <- data %>%
-  select(-removable_columns)
-
-dim(data_partition)
-
-data_partition$res_name <- as.factor(data_partition$res_name)
-
-set.seed(111)
-partition <- createDataPartition(
-  y = data_partition$res_name,
-  p = .7,
-  list = FALSE)
-
-data_train <- data_partition %>%
-  slice(partition)
-data_test <- data_partition %>%
-  slice(-partition)
-dim(data_train)
-dim(data_test)
-
-set.seed(111)
-fit <- train(
-  res_name ~ .,
-  data = data_train,
-  method = "rf",
-  ntree = 10,
-  na.action  = na.pass)
-fit
-
-set.seed(111)
-prediction <- predict(fit, newdata = data_test)
-confusionMatrix(data = prediction, data_test$res_name)
+# dim(data)
+# 
+# removable_columns <- c("blob_coverage", "res_coverage", "local_res_atom_non_h_count", "local_res_atom_non_h_electron_sum", "dict_atom_non_h_count", "dict_atom_non_h_electron_sum")
+# data_partition <- data %>%
+#   select(-removable_columns)
+# 
+# dim(data_partition)
+# 
+# data_partition$res_name <- as.factor(data_partition$res_name)
+# 
+# set.seed(111)
+# partition <- createDataPartition(
+#   y = data_partition$res_name,
+#   p = .7,
+#   list = FALSE)
+# 
+# data_train <- data_partition %>%
+#   slice(partition)
+# data_test <- data_partition %>%
+#   slice(-partition)
+# dim(data_train)
+# dim(data_test)
+# 
+# set.seed(111)
+# fit <- train(
+#   res_name ~ .,
+#   data = data_train,
+#   method = "rf",
+#   ntree = 10,
+#   na.action  = na.pass)
+# fit
+# 
+# set.seed(111)
+# prediction <- predict(fit, newdata = data_test)
+# confusionMatrix(data = prediction, data_test$res_name)
 ```
 
