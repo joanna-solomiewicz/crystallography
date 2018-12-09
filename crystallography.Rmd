@@ -157,46 +157,56 @@ data %>%
 
 #Regresja liniowa
 ##Liczba atomów
-```{r linear regression atom}
+```{r linear regression atom, error=FALSE, warning=FALSE, message=FALSE}
 data_partition <- data %>%
   select_if(is.numeric)
 
 set.seed(111)
-partition <- createDataPartition(y = data_partition$local_res_atom_non_h_count, p = 0.7, list = FALSE)
-data_train <- data %>%
+partition <- createDataPartition(
+  y = data_partition$local_res_atom_non_h_count,
+  p = .7,
+  list = FALSE)
+
+data_train <- data_partition %>%
   slice(partition)
-data_test <- data %>%
+data_test <- data_partition %>%
   slice(-partition)
 dim(data_train)
 dim(data_test)
 
 set.seed(111)
 fit <- train(local_res_atom_non_h_count ~ ., data = data_train, method = "lm")
+fit
+
 set.seed(111)
 prediction <- predict(fit, newdata = data_test)
-fit
 postResample(pred = prediction, obs = data_test$local_res_atom_non_h_count)
 ```
 
 ##Liczba elektronów
-```{r linear regression electron}
+```{r linear regression electron, error=FALSE, warning=FALSE, message=FALSE}
 data_partition <- data %>%
   select_if(is.numeric)
 
 set.seed(111)
-partition <- createDataPartition(y = data_partition$local_res_atom_non_h_electron_sum, p = 0.7, list = FALSE)
-data_train <- data %>%
+partition <- createDataPartition(
+  y = data_partition$local_res_atom_non_h_electron_sum,
+  p = .7,
+  list = FALSE)
+
+data_train <- data_partition %>%
   slice(partition)
-data_test <- data %>%
+data_test <- data_partition %>%
   slice(-partition)
 dim(data_train)
 dim(data_test)
 
 set.seed(111)
 fit <- train(local_res_atom_non_h_electron_sum ~ ., data = data_train, method = "lm")
+fit
+
 set.seed(111)
 prediction <- predict(fit, newdata = data_test)
-fit
 postResample(pred = prediction, obs = data_test$local_res_atom_non_h_electron_sum)
 ```
 
