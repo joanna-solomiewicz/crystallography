@@ -138,10 +138,15 @@ plot_part_data <- plot_part_data %>%
   drop_na()
 dim(plot_part_data)
 
-plot_part_data <- plot_part_data %>%
-  gather(part, value, 1:106)
+names(plot_part_data) <- gsub("part_01_", "", names(plot_part_data))
 
-plot_ly(plot_part_data, x = plot_part_data$value, y = plot_part_data$part, type = 'box', height = 2000)
+plots <- lapply(seq_along(plot_part_data), function(var) {
+    plot_ly(x =  names(plot_part_data[var]), y = ~plot_part_data[,var], type = "box", height = 3000) %>%
+    layout(xaxis = list(tickangle = 10))
+})
+
+subplot(plots, nrows = 16, shareY = FALSE, shareX = FALSE, margin = 0.01, heights = rep(1/16, 16)) %>%
+  layout(showlegend = FALSE)
 ```
 
 #Najwiêksze niezgodnoœci liczby
