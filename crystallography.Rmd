@@ -8,6 +8,28 @@ output:
     toc: yes
     toc_float: yes
 ---
+#Podsumowanie analizy danych
+W mojej analizie na samym pocz¹tku przy wczytywaniu danych odrzuci³am atrybuty, które nie s¹ przeze mnie u¿ywane w dalszej analizie, ani regresji b¹dŸ klasyfikacji.
+
+Nastêpnie z mojego zbioru usunê³am rekordy, w których wyst¹pi³a niewiadoma wartoœæ. Zdecydowa³am siê na usuniêcie, poniewa¿ zbiór danych jest na tyle du¿y, ¿e mog³am sobie na to pozwoliæ zamiast zastêpowania tych wartoœci œrednimi, co jest pewnego rodzaju przek³amaniem.
+
+Dodatkowo ze zbioru pozby³am siê tych ligandów, które zosta³y uwzglêdnione w zbiorze do usuniêcia.
+
+W kolejnym punkcie wykona³am krótkie podsumowanie najwa¿niejszych danych wykorzystywanych w dalszym przetwarzaniu.
+
+Nastêpnie znalaz³am 50 najczêœciej wystêpuj¹cych ligandów i ograniczy³am zbiór w³aœnie do nich oraz przedstawi³am je na histogramie, posortowane wed³ug czêstoœci wyst¹pienia.
+
+Jednym z wyzwañ by³o przedstawienie korelacji miêdzy zmiennymi. Chcia³am w tym celu u¿yæ biblioteki corrplot, która przedstawia graficznie macierz korelacji. Niestety przy tak du¿ej iloœci atrybutów musia³am z tego zrezygnowaæ i postanowi³am przedstawiæ korelacje w postaci tabeli dodatkowo ograniczaj¹c wyniki tylko do tych, gdzie korelacja jest wiêksza b¹dŸ równa **0.999**.
+
+Aby zaprezentowaæ rozk³ad wartoœci liczby atomów i elektronów zastosowa³am wykresy gêstoœciowe.
+
+Dziesiêæ najwiêkszych niezgodnoœci liczby atomów i elektronów przedstawi³am w formie tabeli, podaj¹c dla ka¿dej grupy ligandów uœrednion¹ ró¿nicê.
+
+Kolejnym z wyzwañ by³o zaprezentowanie rozk³adu wartoœci kolumn part_01. Wynika³o to z iloœci tych kolumn. W celu drobnej optymalizacji czytelnoœci wykresów zastosowa³am krok usuniêcia outlier'ów oraz odciêcia prefixu "part_01_" z nazw kolumn, poniewa¿ wystêpowa³ w ka¿dej z nich. Pocz¹tkowo planowa³am zastosowaæ bibliotekê ggplot2, niestety nie dawa³a rady nawet przy 10 tysi¹cach rekordów. Nastêpnie ca³oœæ przepisa³am na bibliotekê plotly, co zadzia³a³o dla 10 tysiêcy rekordów, ale niestety dla ca³oœci danych wygenerowa³o raport wielkoœci ponad 0.4 GB, którego nie by³am w stanie otworzyæ w przegl¹darce. Ostatecznie by³am zmuszona u¿yæ najprostszego rozwi¹zania ze statycznymi wykresami.
+
+Regresjê liniow¹ wykona³am dla standardowych parametrów. Stratyfikowany podzia³ zbioru na ucz¹cy i testowy jako odpowiednio **70%** i **30%** danych oraz wykorzystanie funkcji **lm**.
+
+Tworz¹c klasyfikator zmieni³am stosunek podzia³u na zbiór ucz¹cy i testowy, poniewa¿ danych by³o wystarczaj¹co du¿o. Dlatego ostatecznie stratyfikowany podzia³ wynosi **99%** danych dla zbioru ucz¹cego i **1%** dla zbioru testowego. Do uczenia u¿y³am algorytmu **Random Forest** z parametrem **ntrees = 1000**.
 
 #Wykorzystane biblioteki
 ```{r loading libraries, message = FALSE}
@@ -67,6 +89,17 @@ data <- data %>% filter(res_name %in% popular_names_vector)
 dim(data)
 ```
 
+#Korelacja miêdzy zmiennymi
+```{r correlation between variables, warning=FALSE}
+data %>%
+  select_if(is.numeric) %>%
+  cor() %>%
+  as.data.frame() %>%
+  rownames_to_column() %>%
+  gather(rowname2, value, -rowname) %>%
+  filter(value >= 0.9999, rowname != rowname2)
+```
+
 #Licznoœæ najpopularniejszych ligandów wed³ug nazwy
 ```{r cardinality of ligands}
 plot_ligands <- ggplot(popular_ligands, aes(x = reorder(res_name, -n), y = n, fill = n)) +
@@ -77,17 +110,6 @@ plot_ligands <- ggplot(popular_ligands, aes(x = reorder(res_name, -n), y = n, fi
   labs(title = "Licznoœæ ligandów wed³ug nazwy")
 
 ggplotly(plot_ligands)
-```
-
-#Korelacja miêdzy zmiennymi
-```{r correlation between variables, warning=FALSE}
-data %>%
-  select_if(is.numeric) %>%
-  cor() %>%
-  as.data.frame() %>%
-  rownames_to_column() %>%
-  gather(rowname2, value, -rowname) %>%
-  filter(value >= 0.9999, rowname != rowname2)
 ```
 
 #Rozk³ady gêstoœciowe liczb
@@ -111,6 +133,29 @@ plot_electron <- ggplot(data, aes(x = local_res_atom_non_h_electron_sum)) +
   labs(title = "Rozk³ad gêstoœciowy elektronów")
 
 ggplotly(plot_electron)
+```
+
+#Najwiêksze niezgodnoœci liczby
+##Atomów
+```{r greatest inconsistency in atom}
+data %>%
+  select(res_name, local_res_atom_non_h_count, dict_atom_non_h_count) %>%
+  group_by(res_name) %>%
+  summarise(atom_inconsistency = mean(abs(local_res_atom_non_h_count - dict_atom_non_h_count))) %>%
+  arrange(-atom_inconsistency) %>%
+  slice(1:10) %>%
+  kable()
+```
+
+##Elektronów
+```{r greatest inconsistency in electron}
+data %>%
+  select(res_name, local_res_atom_non_h_electron_sum, dict_atom_non_h_electron_sum) %>%
+  group_by(res_name) %>%
+  summarise(electron_inconsistency = mean(abs(local_res_atom_non_h_electron_sum - dict_atom_non_h_electron_sum))) %>%
+  arrange(-electron_inconsistency) %>%
+  slice(1:10) %>%
+  kable()
 ```
 
 #Rozk³ad wartoœci kolumn part_01
@@ -147,29 +192,6 @@ plots <- lapply(seq_along(plot_part_data), function(var) {
 
 subplot(plots, nrows = 16, shareY = FALSE, shareX = FALSE, margin = 0.01, heights = rep(1/16, 16)) %>%
   layout(showlegend = FALSE)
-```
-
-#Najwiêksze niezgodnoœci liczby
-##Atomów
-```{r greatest inconsistency in atom}
-data %>%
-  select(res_name, local_res_atom_non_h_count, dict_atom_non_h_count) %>%
-  group_by(res_name) %>%
-  summarise(atom_inconsistency = mean(abs(local_res_atom_non_h_count - dict_atom_non_h_count))) %>%
-  arrange(-atom_inconsistency) %>%
-  slice(1:10) %>%
-  kable()
-```
-
-##Elektronów
-```{r greatest inconsistency in electron}
-data %>%
-  select(res_name, local_res_atom_non_h_electron_sum, dict_atom_non_h_electron_sum) %>%
-  group_by(res_name) %>%
-  summarise(electron_inconsistency = mean(abs(local_res_atom_non_h_electron_sum - dict_atom_non_h_electron_sum))) %>%
-  arrange(-electron_inconsistency) %>%
-  slice(1:10) %>%
-  kable()
 ```
 
 #Regresja liniowa
