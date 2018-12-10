@@ -248,7 +248,7 @@ data_partition$res_name <- as.factor(data_partition$res_name)
 set.seed(111)
 partition <- createDataPartition(
   y = data_partition$res_name,
-  p = .7,
+  p = .99,
   list = FALSE)
 
 data_train <- data_partition %>%
@@ -261,7 +261,7 @@ fit <- train(
   res_name ~ .,
   data = data_train,
   method = "rf",
-  ntree = 10,
+  ntree = 1000,
   na.action  = na.pass)
 fit
 
