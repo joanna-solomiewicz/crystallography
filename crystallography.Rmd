@@ -188,52 +188,52 @@ ggplot(plot_part_data, aes(x = part, y = value)) +
 #Regresja liniowa
 ##Liczba atomów
 ```{r linear regression atom, error=FALSE, warning=FALSE, message=FALSE}
-# data_partition <- data %>%
-#   select_if(is.numeric)
-# 
-# set.seed(111)
-# partition <- createDataPartition(
-#   y = data_partition$local_res_atom_non_h_count,
-#   p = .7,
-#   list = FALSE)
-# 
-# data_train <- data_partition %>%
-#   slice(partition)
-# data_test <- data_partition %>%
-#   slice(-partition)
-# 
-# set.seed(111)
-# fit <- train(local_res_atom_non_h_count ~ ., data = data_train, method = "lm")
-# fit
-# 
-# set.seed(111)
-# prediction <- predict(fit, newdata = data_test)
-# postResample(pred = prediction, obs = data_test$local_res_atom_non_h_count)
+data_partition <- data %>%
+  select_if(is.numeric)
+
+set.seed(111)
+partition <- createDataPartition(
+  y = data_partition$local_res_atom_non_h_count,
+  p = .7,
+  list = FALSE)
+
+data_train <- data_partition %>%
+  slice(partition)
+data_test <- data_partition %>%
+  slice(-partition)
+
+set.seed(111)
+fit <- train(local_res_atom_non_h_count ~ ., data = data_train, method = "lm")
+fit
+
+set.seed(111)
+prediction <- predict(fit, newdata = data_test)
+postResample(pred = prediction, obs = data_test$local_res_atom_non_h_count)
 ```
 
 ##Liczba elektronów
 ```{r linear regression electron, error=FALSE, warning=FALSE, message=FALSE}
-# data_partition <- data %>%
-#   select_if(is.numeric)
-# 
-# set.seed(111)
-# partition <- createDataPartition(
-#   y = data_partition$local_res_atom_non_h_electron_sum,
-#   p = .7,
-#   list = FALSE)
-# 
-# data_train <- data_partition %>%
-#   slice(partition)
-# data_test <- data_partition %>%
-#   slice(-partition)
-# 
-# set.seed(111)
-# fit <- train(local_res_atom_non_h_electron_sum ~ ., data = data_train, method = "lm")
-# fit
-# 
-# set.seed(111)
-# prediction <- predict(fit, newdata = data_test)
-# postResample(pred = prediction, obs = data_test$local_res_atom_non_h_electron_sum)
+data_partition <- data %>%
+  select_if(is.numeric)
+
+set.seed(111)
+partition <- createDataPartition(
+  y = data_partition$local_res_atom_non_h_electron_sum,
+  p = .7,
+  list = FALSE)
+
+data_train <- data_partition %>%
+  slice(partition)
+data_test <- data_partition %>%
+  slice(-partition)
+
+set.seed(111)
+fit <- train(local_res_atom_non_h_electron_sum ~ ., data = data_train, method = "lm")
+fit
+
+set.seed(111)
+prediction <- predict(fit, newdata = data_test)
+postResample(pred = prediction, obs = data_test$local_res_atom_non_h_electron_sum)
 ```
 
 #Klasyfikator
