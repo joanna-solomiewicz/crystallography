@@ -46,8 +46,9 @@ dim(data)
 
 #Podsumowanie danych
 ```{r data summary}
+cols_summary <- c("res_name", "local_res_atom_non_h_count", "local_res_atom_non_h_electron_sum", "dict_atom_non_h_count", "dict_atom_non_h_electron_sum")
 statistics <- data %>%
-  select(res_name, blob_volume_coverage, blob_volume_coverage_second)
+  select(one_of(cols_summary))
 kable(summary(statistics))
 dim(data)
 ```
