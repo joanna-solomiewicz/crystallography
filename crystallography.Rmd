@@ -159,7 +159,7 @@ data %>%
 ```
 
 #Rozk³ad wartoœci kolumn part_01
-```{r distribution of part_01 columns}
+```{r distribution of part_01 columns, fig.height = 50, fig.width = 15}
 remove_outliers <- function(data, na.rm = TRUE, ...) {
   qnt <- quantile(data, probs=c(.25, .75), na.rm = na.rm, ...)
   iqr <- 1.5 * IQR(data, na.rm = na.rm)
@@ -176,22 +176,20 @@ dim(plot_part_data)
 
 plot_part_data <- plot_part_data %>%
   sapply(remove_outliers) %>%
-  as.data.frame()
-dim(plot_part_data)
-
-plot_part_data <- plot_part_data %>%
+  as.data.frame() %>%
   drop_na()
-dim(plot_part_data)
 
 names(plot_part_data) <- gsub("part_01_", "", names(plot_part_data))
 
-plots <- lapply(seq_along(plot_part_data), function(var) {
-    plot_ly(x =  names(plot_part_data[var]), y = ~plot_part_data[,var], type = "box", height = 3000) %>%
-    layout(xaxis = list(tickangle = 10))
-})
+plot_part_data <- plot_part_data %>%
+  gather(part, value, 1:106)
 
-subplot(plots, nrows = 16, shareY = FALSE, shareX = FALSE, margin = 0.01, heights = rep(1/16, 16)) %>%
-  layout(showlegend = FALSE)
+dim(plot_part_data)
+
+ggplot(plot_part_data, aes(x = part, y = value)) +
+  geom_boxplot() +
+  facet_wrap(~part, scales = "free", ncol = 6) +
+  labs(title = "Rozk³ad wartoœci kolumn part_01")
 ```
 
 #Regresja liniowa
