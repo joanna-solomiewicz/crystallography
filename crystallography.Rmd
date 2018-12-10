@@ -47,7 +47,7 @@ library(tibble)
 ```{r reading data}
 removable_columns <- c("title", "pdb_code", "res_id", "chain_id", "local_res_atom_count", "local_res_atom_non_h_occupancy_sum", "local_res_atom_non_h_electron_occupancy_sum", "local_res_atom_C_count", "local_res_atom_N_count", "local_res_atom_O_count", "local_res_atom_S_count", "dict_atom_C_count", "dict_atom_N_count", "dict_atom_O_count", "dict_atom_S_count", "skeleton_data", "skeleton_cycle_4", "skeleton_diameter", "skeleton_cycle_6", "skeleton_cycle_7", "skeleton_closeness_006_008", "skeleton_closeness_002_004", "skeleton_cycle_3", "skeleton_avg_degree", "skeleton_closeness_004_006", "skeleton_closeness_010_012", "skeleton_closeness_012_014", "skeleton_edges", "skeleton_radius", "skeleton_cycle_8_plus", "skeleton_closeness_020_030", "skeleton_deg_5_plus", "skeleton_closeness_016_018", "skeleton_closeness_008_010", "skeleton_closeness_018_020", "skeleton_average_clustering", "skeleton_closeness_040_050", "skeleton_closeness_014_016", "skeleton_center", "skeleton_closeness_000_002", "skeleton_density", "skeleton_closeness_030_040", "skeleton_deg_4", "skeleton_deg_0", "skeleton_deg_1", "skeleton_deg_2", "skeleton_deg_3", "skeleton_graph_clique_number", "skeleton_nodes", "skeleton_cycles", "skeleton_cycle_5", "skeleton_closeness_050_plus", "skeleton_periphery", "fo_col", "fc_col", "weight_col", "grid_space", "solvent_radius", "solvent_opening_radius", "part_step_FoFc_std_min", "part_step_FoFc_std_max", "part_step_FoFc_std_step")
 
-data <- fread("./all_summary.csv", nrows = 10000, header = TRUE, drop = removable_columns)
+data <- fread("./all_summary.csv", header = TRUE, drop = removable_columns)
 ```
 
 #Przetwarzanie brakuj¹cych danych
@@ -188,85 +188,85 @@ ggplot(plot_part_data, aes(x = part, y = value)) +
 #Regresja liniowa
 ##Liczba atomów
 ```{r linear regression atom, error=FALSE, warning=FALSE, message=FALSE}
-data_partition <- data %>%
-  select_if(is.numeric)
-
-set.seed(111)
-partition <- createDataPartition(
-  y = data_partition$local_res_atom_non_h_count,
-  p = .7,
-  list = FALSE)
-
-data_train <- data_partition %>%
-  slice(partition)
-data_test <- data_partition %>%
-  slice(-partition)
-
-set.seed(111)
-fit <- train(local_res_atom_non_h_count ~ ., data = data_train, method = "lm")
-fit
-
-set.seed(111)
-prediction <- predict(fit, newdata = data_test)
-postResample(pred = prediction, obs = data_test$local_res_atom_non_h_count)
+# data_partition <- data %>%
+#   select_if(is.numeric)
+# 
+# set.seed(111)
+# partition <- createDataPartition(
+#   y = data_partition$local_res_atom_non_h_count,
+#   p = .7,
+#   list = FALSE)
+# 
+# data_train <- data_partition %>%
+#   slice(partition)
+# data_test <- data_partition %>%
+#   slice(-partition)
+# 
+# set.seed(111)
+# fit <- train(local_res_atom_non_h_count ~ ., data = data_train, method = "lm")
+# fit
+# 
+# set.seed(111)
+# prediction <- predict(fit, newdata = data_test)
+# postResample(pred = prediction, obs = data_test$local_res_atom_non_h_count)
 ```
 
 ##Liczba elektronów
 ```{r linear regression electron, error=FALSE, warning=FALSE, message=FALSE}
-data_partition <- data %>%
-  select_if(is.numeric)
-
-set.seed(111)
-partition <- createDataPartition(
-  y = data_partition$local_res_atom_non_h_electron_sum,
-  p = .7,
-  list = FALSE)
-
-data_train <- data_partition %>%
-  slice(partition)
-data_test <- data_partition %>%
-  slice(-partition)
-
-set.seed(111)
-fit <- train(local_res_atom_non_h_electron_sum ~ ., data = data_train, method = "lm")
-fit
-
-set.seed(111)
-prediction <- predict(fit, newdata = data_test)
-postResample(pred = prediction, obs = data_test$local_res_atom_non_h_electron_sum)
+# data_partition <- data %>%
+#   select_if(is.numeric)
+# 
+# set.seed(111)
+# partition <- createDataPartition(
+#   y = data_partition$local_res_atom_non_h_electron_sum,
+#   p = .7,
+#   list = FALSE)
+# 
+# data_train <- data_partition %>%
+#   slice(partition)
+# data_test <- data_partition %>%
+#   slice(-partition)
+# 
+# set.seed(111)
+# fit <- train(local_res_atom_non_h_electron_sum ~ ., data = data_train, method = "lm")
+# fit
+# 
+# set.seed(111)
+# prediction <- predict(fit, newdata = data_test)
+# postResample(pred = prediction, obs = data_test$local_res_atom_non_h_electron_sum)
 ```
 
 #Klasyfikator
 ####Przewidywanie wartoœci res_name
 ```{r classification}
-removable_columns <- c("blob_coverage", "res_coverage", "local_res_atom_non_h_count", "local_res_atom_non_h_electron_sum", "dict_atom_non_h_count", "dict_atom_non_h_electron_sum")
-data_partition <- data %>%
-  select(-removable_columns)
-
-data_partition$res_name <- as.factor(data_partition$res_name)
-
-set.seed(111)
-partition <- createDataPartition(
-  y = data_partition$res_name,
-  p = .99,
-  list = FALSE)
-
-data_train <- data_partition %>%
-  slice(partition)
-data_test <- data_partition %>%
-  slice(-partition)
-
-set.seed(111)
-fit <- train(
-  res_name ~ .,
-  data = data_train,
-  method = "rf",
-  ntree = 1000,
-  na.action  = na.pass)
-fit
-
-set.seed(111)
-prediction <- predict(fit, newdata = data_test)
-confusionMatrix(data = prediction, data_test$res_name)
+# removable_columns <- c("blob_coverage", "res_coverage", "local_res_atom_non_h_count", "local_res_atom_non_h_electron_sum", "dict_atom_non_h_count", "dict_atom_non_h_electron_sum")
+# data_partition <- data %>%
+#   select(-removable_columns)
+# 
+# data_partition$res_name <- as.factor(data_partition$res_name)
+# 
+# set.seed(111)
+# partition <- createDataPartition(
+#   y = data_partition$res_name,
+#   p = .99,
+#   list = FALSE)
+# 
+# data_train <- data_partition %>%
+#   slice(partition)
+# data_test <- data_partition %>%
+#   slice(-partition)
+# 
+# set.seed(111)
+# fit <- train(
+#   res_name ~ .,
+#   data = data_train,
+#   method = "rf",
+#   ntree = 1000,
+#   na.action  = na.pass)
+# fit
+# 
+# set.seed(111)
+# prediction <- predict(fit, newdata = data_test)
+# confusionMatrix(data = prediction, data_test$res_name)
 ```
 
